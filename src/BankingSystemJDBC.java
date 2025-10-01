@@ -79,26 +79,21 @@ public class BankingSystemJDBC {
         System.out.print("Enter Amount: ");
         double amt = sc.nextDouble();
 
-        String check = "SELECT balance FROM account WHERE acco_no = ?";
-        PreparedStatement ps1 = conn.prepareStatement(check);
-        ps1.setInt(1, accNo);
-        ResultSet rs = ps1.executeQuery();
+// Single query: update only if balance is enough
+      String sql = "UPDATE account SET balance = balance - ? WHERE acco_no = ? AND balance >= ?";
+      PreparedStatement ps = conn.prepareStatement(sql);
+         ps.setDouble(1, amt);
+         ps.setInt(2, accNo);
+         ps.setDouble(3, amt);
 
-        if (rs.next()) {
-            double bal = rs.getDouble("balance");
-            if (amt <= bal) {
-                String sql = "UPDATE account SET balance = balance - ? WHERE acco_no = ?";
-                PreparedStatement ps2 = conn.prepareStatement(sql);
-                ps2.setDouble(1, amt);
-                ps2.setInt(2, accNo);
-                ps2.executeUpdate();
-                System.out.println("Withdraw Done.");
-            } else {
-                System.out.println("Not Enough Balance.");
-            }
-        } else {
-            System.out.println("Account Not Found.");
-        }
+           int rows = ps.executeUpdate();
+
+            if (rows > 0) {
+             System.out.println("Withdraw Done.");
+                } else {
+           System.out.println("Not Enough Balance or Account Not Found.");
+          }
+
     }
 
     // Check balance
